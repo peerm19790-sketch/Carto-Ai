@@ -298,7 +298,6 @@
       const competitorCount = baseCompetitorDensity;
 
       // 3. Recommended CapEx Allocation
-      // CapEx is tailored to budget, with floor at minCapex if budget allows
       const recommendedCapex = Math.max(ind.minCapex, Math.min(budget, ind.optimalCapex * 1.5));
       const capexEq = Math.round(recommendedCapex * ind.capexRatio.equipment);
       const capexFitout = Math.round(recommendedCapex * ind.capexRatio.interior);
@@ -306,12 +305,10 @@
       const capexRunway = Math.round(recommendedCapex * ind.capexRatio.runway);
 
       // 4. Monthly Revenue & OpEx Projections
-      // Daily Captured Customers based on footfall & capture rate
       const captureShare = (ind.captureRate * 0.45) / Math.sqrt(Math.max(1, competitorCount * 0.8));
       const dailyCustomers = Math.max(8, Math.round(dailyPedestrianFootfall * captureShare));
       const monthlyOperatingDays = 26;
       
-      // Steady State (Mature) Monthly Gross Revenue
       const matureGrossMonthlyRevenue = Math.round(dailyCustomers * ind.avgTicketSize * monthlyOperatingDays);
 
       // Monthly OpEx Breakdown
@@ -321,7 +318,7 @@
       const estUtilities = Math.round(estRent * 0.28 + 3500);
       const totalMonthlyOpex = estRent + estCogs + estSalaries + estUtilities;
 
-      // Mature vs Year-1 Ramp-Up Profits (Year 1 accounts for initial 6-month ramp-up)
+      // Mature vs Year-1 Ramp-Up Profits
       const matureMonthlyProfit = Math.max(8000, matureGrossMonthlyRevenue - totalMonthlyOpex);
       const year1AvgMonthlyProfit = Math.round(matureMonthlyProfit * 0.72);
       const profitMarginPct = ((matureMonthlyProfit / matureGrossMonthlyRevenue) * 100).toFixed(1);
@@ -331,9 +328,7 @@
       const grossMonthlyRevenue = matureGrossMonthlyRevenue;
       const netMonthlyProfit = matureMonthlyProfit;
 
-
-      // 5. Multi-Factor Composite Feasibility Score (0 - 100)
-      // A. Capital Adequacy (25%)
+      // 5. Composite Feasibility Score (0 - 100)
       let capScore = 0;
       if (budget < ind.minCapex) {
         capScore = Math.max(25, Math.round((budget / ind.minCapex) * 60));
@@ -343,16 +338,10 @@
         capScore = 75 + Math.round(((budget - ind.minCapex) / (ind.optimalCapex - ind.minCapex)) * 20);
       }
 
-      // B. Macro / Location Synergy (25%)
       let synergyScore = ind.idealMacro.includes(macroEnv) ? 94 : 68;
-
-      // C. Demand & Density Index (20%)
       let demandScore = Math.min(96, Math.max(60, Math.round((dailyPedestrianFootfall / 8000) * 85)));
-
-      // D. Unit Economics & ROI Index (20%)
       let unitEcoScore = breakevenMonths <= 14 ? 92 : breakevenMonths <= 24 ? 76 : 58;
 
-      // E. Infrastructure Multiplier (10%)
       const rawScore = (capScore * 0.25) + (synergyScore * 0.25) + (demandScore * 0.20) + (unitEcoScore * 0.20);
       const finalScore = Math.min(97, Math.max(35, Math.round(rawScore * infra.multiplier)));
 
@@ -419,7 +408,7 @@
         };
       }
 
-      // 8. Multi-Radius Variations (500m, 1km, 2km, 5km)
+      // 8. Multi-Radius Variations
       const radiusAnalysis = {
         0.5: {
           area: "0.79 sq.km",
@@ -485,11 +474,9 @@
     }
   }
 
-  // Expose engine to window
   if (typeof window !== "undefined") {
     window.GeoFeasibilityEngine = GeoFeasibilityEngine;
   }
-
 
   /* ==========================================================================
      3. MAP CONTROLLER (LEAFLET.JS)
@@ -516,10 +503,10 @@
       center: [defaultLoc.lat, defaultLoc.lng],
       zoom: 14,
       zoomControl: false,
-      attributionControl: false
+      attributionControl: false,
+      scrollWheelZoom: false
     });
 
-    // High quality CartoDB Positron tiles
     L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
       maxZoom: 19,
       subdomains: "abcd"
@@ -527,7 +514,6 @@
 
     updateMapLocation(defaultLoc.lat, defaultLoc.lng, 1.0);
 
-    // Wire custom map zoom & recenter buttons
     document.getElementById("mapZoomInBtn")?.addEventListener("click", () => {
       if (proposalMap) proposalMap.zoomIn();
     });
@@ -539,13 +525,11 @@
     });
   }
 
-
   function updateMapLocation(lat, lng, radiusKm) {
     if (!proposalMap || typeof L === "undefined") return;
 
     proposalMap.setView([lat, lng], radiusKm <= 1 ? 14 : radiusKm <= 2.5 ? 13 : 12);
 
-    // Target Marker
     if (proposalTargetMarker) proposalMap.removeLayer(proposalTargetMarker);
     const targetIcon = L.divIcon({
       className: "custom-pin-target",
@@ -556,7 +540,6 @@
       .addTo(proposalMap)
       .bindPopup("<strong>Proposed Venture Spot</strong><br/>Optimal Spatial Node");
 
-    // Catchment Circle
     if (proposalCircle) proposalMap.removeLayer(proposalCircle);
     proposalCircle = L.circle([lat, lng], {
       radius: radiusKm * 1000,
@@ -567,7 +550,6 @@
       dashArray: "6, 6"
     }).addTo(proposalMap);
 
-    // Dynamic Competitor Markers
     proposalCompMarkers.forEach((m) => proposalMap.removeLayer(m));
     proposalCompMarkers = [];
 
@@ -640,13 +622,18 @@
   }
 
   /* ==========================================================================
-     4. UI STATE & INTERACTION BINDINGS
+     4. UI STATE & SCREEN CONTROLLER
      ========================================================================== */
   const screens = {
     proposal: document.getElementById("screen-proposal"),
     loading: document.getElementById("screen-loading"),
     report: document.getElementById("screen-report")
   };
+
+  const mobileBottomBar = document.getElementById("mobileBottomBar");
+  const mobileBarRunBtn = document.getElementById("mobileBarRunBtn");
+  const mobileBarReconfigureBtn = document.getElementById("mobileBarReconfigureBtn");
+  const mobileBarPrintBtn = document.getElementById("mobileBarPrintBtn");
 
   let currentAnalysisResult = null;
 
@@ -665,8 +652,7 @@
       }
     });
 
-
-    // Update active nav link
+    // Update active nav links
     const navProposal = document.getElementById("navProposal");
     const analysisTabLink = document.getElementById("analysisTabLink");
     const mobNavProposal = document.getElementById("mobNavProposal");
@@ -677,30 +663,47 @@
       analysisTabLink?.classList.remove("mainnav__link--active");
       mobNavProposal?.classList.add("active");
       mobNavReport?.classList.remove("active");
+
+      // Update mobile bottom bar
+      if (mobileBottomBar) {
+        mobileBottomBar.style.display = "flex";
+        if (mobileBarRunBtn) mobileBarRunBtn.style.display = "inline-flex";
+        if (mobileBarReconfigureBtn) mobileBarReconfigureBtn.style.display = "none";
+        if (mobileBarPrintBtn) mobileBarPrintBtn.style.display = "none";
+      }
+
       setTimeout(() => {
         if (proposalMap) proposalMap.invalidateSize();
         else initProposalMap();
-      }, 120);
+      }, 150);
+    } else if (name === "loading") {
+      if (mobileBottomBar) mobileBottomBar.style.display = "none";
     } else if (name === "report") {
       analysisTabLink?.classList.add("mainnav__link--active");
       navProposal?.classList.remove("mainnav__link--active");
       mobNavReport?.classList.add("active");
       mobNavProposal?.classList.remove("active");
+
+      // Update mobile bottom bar
+      if (mobileBottomBar) {
+        mobileBottomBar.style.display = "flex";
+        if (mobileBarRunBtn) mobileBarRunBtn.style.display = "none";
+        if (mobileBarReconfigureBtn) mobileBarReconfigureBtn.style.display = "inline-flex";
+        if (mobileBarPrintBtn) mobileBarPrintBtn.style.display = "inline-flex";
+      }
+
       setTimeout(() => {
         if (reportGapMap) reportGapMap.invalidateSize();
-      }, 120);
+      }, 150);
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-
-  // Currency Formatter
   function formatINR(val) {
     return "₹" + Number(val).toLocaleString("en-IN");
   }
 
-  // Read current form inputs
   function getFormData() {
     const businessIdea = document.getElementById("businessIdea")?.value.trim() || "Venture Feasibility";
     const industryCategory = document.getElementById("industryCategory")?.value || "printing";
@@ -725,7 +728,6 @@
     };
   }
 
-  // Set form inputs
   function setFormData(data) {
     if (data.businessIdea) document.getElementById("businessIdea").value = data.businessIdea;
     if (data.industryCategory) document.getElementById("industryCategory").value = data.industryCategory;
@@ -794,7 +796,6 @@
     syncMapWithLocationInput();
   });
 
-  // Location input sync with Leaflet map
   function syncMapWithLocationInput() {
     const locStr = document.getElementById("targetLocation")?.value.trim() || "";
     const radius = Number(document.getElementById("catchmentSlider")?.value || 1.0);
@@ -811,7 +812,6 @@
     currentAnalysisResult = result;
     const { inputs, industry, metrics, score, verdictLabel, verdictClass, verdictSubtext, scheme, contextNote } = result;
 
-    // Header & Summary
     const reportTitle = document.getElementById("reportBusinessTitle");
     if (reportTitle) reportTitle.textContent = inputs.businessIdea;
 
@@ -839,10 +839,9 @@
       verdictCard.className = `verdict-card ${verdictClass}`;
     }
 
-    // Animate Circular Progress Ring
     const ringCircle = document.getElementById("verdictRingProgress");
     if (ringCircle) {
-      const circumference = 2 * Math.PI * 38; // r=38 -> 238.76
+      const circumference = 2 * Math.PI * 38;
       const offset = circumference - (score / 100) * circumference;
       ringCircle.style.strokeDasharray = `${circumference}`;
       ringCircle.style.strokeDashoffset = `${offset}`;
@@ -1000,7 +999,6 @@
         </div>
       `;
 
-      // Re-attach collapse toggles
       schemesContainer.querySelectorAll(".scheme-detail__toggle").forEach((btn) => {
         btn.addEventListener("click", () => {
           const expanded = btn.getAttribute("aria-expanded") === "true";
@@ -1063,7 +1061,7 @@
     if (progressFill) progressFill.style.width = "0%";
     if (progressStepPercent) progressStepPercent.textContent = "0%";
 
-    const stepDuration = 650;
+    const stepDuration = 600;
     loadingMessages.forEach((msg, i) => {
       const t = setTimeout(() => {
         if (loadingStatusText) loadingStatusText.textContent = msg;
@@ -1071,7 +1069,6 @@
         if (progressFill) progressFill.style.width = `${pct}%`;
         if (progressStepPercent) progressStepPercent.textContent = `${pct}%`;
 
-        // Update pipeline step highlights
         const pipeStepId = `pipeStep${Math.min(4, i + 1)}`;
         document.querySelectorAll(".pipeline-step").forEach((p) => p.classList.remove("pipeline-step--active"));
         document.getElementById(pipeStepId)?.classList.add("pipeline-step--active");
@@ -1079,12 +1076,13 @@
       loadingTimers.push(t);
     });
 
-    const finishTimer = setTimeout(onComplete, loadingMessages.length * stepDuration + 250);
+    const finishTimer = setTimeout(onComplete, loadingMessages.length * stepDuration + 200);
     loadingTimers.push(finishTimer);
   }
 
   function startFeasibilityRun(e) {
     if (e && e.preventDefault) e.preventDefault();
+    closeMobileMenu();
     try {
       const formData = getFormData();
       const result = GeoFeasibilityEngine.calculate(formData);
@@ -1105,33 +1103,37 @@
     }
   }
 
-  // Buttons triggering Feasibility Run
+  // Primary Action Buttons
   document.getElementById("generateBtn")?.addEventListener("click", startFeasibilityRun);
   document.getElementById("runFeasibilityBtn")?.addEventListener("click", startFeasibilityRun);
-  document.getElementById("runFeasibilityBtnMobile")?.addEventListener("click", (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    mobileMenu?.classList.remove("is-open");
-    startFeasibilityRun(e);
-  });
+  document.getElementById("runFeasibilityBtnMobile")?.addEventListener("click", startFeasibilityRun);
+  document.getElementById("mobileBarRunBtn")?.addEventListener("click", startFeasibilityRun);
 
-  // Back to Proposal
+  // Return to Proposal
   function returnToProposal(e) {
     if (e && e.preventDefault) e.preventDefault();
+    closeMobileMenu();
     clearLoadingTimers();
     showScreen("proposal");
   }
   document.getElementById("backToProposalBtn")?.addEventListener("click", returnToProposal);
   document.getElementById("bottomBackBtn")?.addEventListener("click", returnToProposal);
   document.getElementById("navProposal")?.addEventListener("click", returnToProposal);
-  document.getElementById("mobNavProposal")?.addEventListener("click", (e) => {
-    mobileMenu?.classList.remove("is-open");
-    returnToProposal(e);
-  });
+  document.getElementById("mobNavProposal")?.addEventListener("click", returnToProposal);
+  document.getElementById("mobileBarReconfigureBtn")?.addEventListener("click", returnToProposal);
 
-
-  // Tab Link to Report (if report exists)
+  // Tab Link to Report
   document.getElementById("analysisTabLink")?.addEventListener("click", (e) => {
     e.preventDefault();
+    if (!currentAnalysisResult) {
+      startFeasibilityRun();
+    } else {
+      showScreen("report");
+    }
+  });
+  document.getElementById("mobNavReport")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    closeMobileMenu();
     if (!currentAnalysisResult) {
       startFeasibilityRun();
     } else {
@@ -1175,11 +1177,19 @@
 
   function openPresetModal() {
     renderPresetsList();
-    if (presetModal) presetModal.classList.add("is-active");
+    if (presetModal) {
+      presetModal.classList.add("is-active");
+      presetModal.setAttribute("aria-hidden", "false");
+    }
+    document.body.classList.add("modal-open");
   }
 
   function closePresetModal() {
-    if (presetModal) presetModal.classList.remove("is-active");
+    if (presetModal) {
+      presetModal.classList.remove("is-active");
+      presetModal.setAttribute("aria-hidden", "true");
+    }
+    document.body.classList.remove("modal-open");
   }
 
   document.getElementById("loadPresetBtn")?.addEventListener("click", openPresetModal);
@@ -1194,7 +1204,7 @@
   });
   document.getElementById("mobNavPresets")?.addEventListener("click", (e) => {
     e.preventDefault();
-    mobileMenu.classList.remove("is-open");
+    closeMobileMenu();
     openPresetModal();
   });
   document.getElementById("closePresetModalBtn")?.addEventListener("click", closePresetModal);
@@ -1296,17 +1306,19 @@
 
   document.getElementById("exportCSVBtn")?.addEventListener("click", downloadCSV);
   document.getElementById("exportReportCsvBtn")?.addEventListener("click", downloadCSV);
-  document.getElementById("exportBtnMobile")?.addEventListener("click", downloadCSV);
+  document.getElementById("exportBtnMobile")?.addEventListener("click", () => {
+    closeMobileMenu();
+    downloadCSV();
+  });
   document.getElementById("exportJSONBtn")?.addEventListener("click", downloadJSON);
   document.getElementById("bottomExportJsonBtn")?.addEventListener("click", downloadJSON);
 
-  // Print Report
   function printExecutiveReport() {
     if (screens.report.hidden) {
       const data = GeoFeasibilityEngine.calculate(getFormData());
       renderAnalysisReport(data);
       showScreen("report");
-      setTimeout(() => window.print(), 300);
+      setTimeout(() => window.print(), 350);
     } else {
       window.print();
     }
@@ -1314,12 +1326,63 @@
 
   document.getElementById("downloadReportBtn")?.addEventListener("click", printExecutiveReport);
   document.getElementById("bottomPrintBtn")?.addEventListener("click", printExecutiveReport);
+  document.getElementById("mobileBarPrintBtn")?.addEventListener("click", printExecutiveReport);
 
-  // Mobile menu toggle
+  /* ==========================================================================
+     9. MOBILE DRAWER & RESPONSIVE RESIZING CONTROLLER
+     ========================================================================== */
   const hamburgerBtn = document.getElementById("hamburgerBtn");
   const mobileMenu = document.getElementById("mobileMenu");
+  const mobileMenuBackdrop = document.getElementById("mobileMenuBackdrop");
+  const closeMobileMenuBtn = document.getElementById("closeMobileMenuBtn");
+
+  function openMobileMenu() {
+    if (mobileMenu) mobileMenu.classList.add("is-open");
+    if (mobileMenuBackdrop) mobileMenuBackdrop.classList.add("is-active");
+    document.body.classList.add("menu-open");
+  }
+
+  function closeMobileMenu() {
+    if (mobileMenu) mobileMenu.classList.remove("is-open");
+    if (mobileMenuBackdrop) mobileMenuBackdrop.classList.remove("is-active");
+    document.body.classList.remove("menu-open");
+  }
+
   hamburgerBtn?.addEventListener("click", () => {
-    mobileMenu.classList.toggle("is-open");
+    if (mobileMenu?.classList.contains("is-open")) closeMobileMenu();
+    else openMobileMenu();
+  });
+
+  closeMobileMenuBtn?.addEventListener("click", closeMobileMenu);
+  mobileMenuBackdrop?.addEventListener("click", closeMobileMenu);
+
+  // Close modals on Escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closePresetModal();
+      closeMobileMenu();
+    }
+  });
+
+  // Debounced Window Resize & Orientation Change Map Invalidation
+  let resizeDebounce = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeDebounce);
+    resizeDebounce = setTimeout(() => {
+      if (proposalMap && !screens.proposal.hidden) {
+        proposalMap.invalidateSize();
+      }
+      if (reportGapMap && !screens.report.hidden) {
+        reportGapMap.invalidateSize();
+      }
+    }, 150);
+  });
+
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => {
+      if (proposalMap && !screens.proposal.hidden) proposalMap.invalidateSize();
+      if (reportGapMap && !screens.report.hidden) reportGapMap.invalidateSize();
+    }, 200);
   });
 
   // Topbar Logo click
@@ -1339,9 +1402,8 @@
   });
 
   /* ==========================================================================
-     9. INITIALIZATION
+     10. INITIALIZATION
      ========================================================================== */
   showScreen("proposal");
   initProposalMap();
 })();
-

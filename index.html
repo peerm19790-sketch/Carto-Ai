@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoFeasibility AI — Enterprise Location Intelligence & Business Feasibility Engine</title>
+  <meta name="description" content="AI-powered geospatial business feasibility engine. Configure location, capital, and operational parameters to generate predictive spatial analytics, ROI models, and equipment recommendations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS for Interactive Spatial Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ============ GLOBAL SECURE ENV STRIP ============ -->
+<div class="secure-strip">
+  <span class="secure-strip__pill">ONLINE</span>
+  <span>CARTO+ AI ENGINE &nbsp;•&nbsp; ENTERPRISE GEOSPATIAL INTELLIGENCE &nbsp;•&nbsp; PRECISION FEASIBILITY v2.4</span>
+</div>
+
+<!-- ============ TOP APP BAR ============ -->
+<header class="topbar">
+  <div class="topbar__inner">
+    <div class="brand" id="brandLogo" role="button" tabindex="0" title="GeoFeasibility AI Home">
+      <span class="brand__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9.25" stroke="#4F46FF" stroke-width="1.8"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="#4F46FF" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" fill="#4F46FF"/>
+        </svg>
+      </span>
+      <span class="brand__name">GeoFeasibility <span class="brand__ai">AI</span></span>
+    </div>
+
+    <nav class="mainnav" id="mainNav">
+      <a href="#" class="mainnav__link mainnav__link--active" id="navProposal" data-screen="proposal">Configuration</a>
+      <a href="#" class="mainnav__link" id="navPresets" data-action="presets">Presets Catalog</a>
+      <a href="#" class="mainnav__link" id="navInsights" data-action="insights">Spatial Metrics</a>
+      <a href="#" class="mainnav__link" id="analysisTabLink" data-screen="report">Feasibility Report</a>
+    </nav>
+
+    <div class="topbar__actions">
+      <div class="export-dropdown-wrap">
+        <button class="btn btn--ghost hide-sm" id="exportBtn" aria-haspopup="true" aria-expanded="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export Data ▾
+        </button>
+        <div class="dropdown-menu" id="exportMenu">
+          <button class="dropdown-item" id="exportCSVBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.8"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Export Financial CSV
+          </button>
+          <button class="dropdown-item" id="exportJSONBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 16V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zM4 10h16M10 4v16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Export Full JSON Model
+          </button>
+        </div>
+      </div>
+      <button class="btn btn--primary" id="runFeasibilityBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
+        Run Feasibility
+      </button>
+      <div class="icon-actions hide-sm">
+        <button class="icon-btn" id="quickPresetBtnTop" title="Explore Presets" aria-label="Explore Presets">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#464556" stroke-width="1.7"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#464556" stroke-width="1.7"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#464556" stroke-width="1.7"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#464556" stroke-width="1.7"/></svg>
+        </button>
+        <button class="icon-btn" id="themeToggleBtn" title="Help & Tips" aria-label="Help & Guidance">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><circle cx="12" cy="12" r="9" stroke="#464556" stroke-width="1.7"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" stroke="#464556" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <button class="hamburger hide-lg" id="hamburgerBtn" aria-label="Toggle Navigation Menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#131B32" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="#" class="active" id="mobNavProposal">Configuration</a>
+    <a href="#" id="mobNavPresets">Preset Scenarios</a>
+    <a href="#" id="mobNavReport">Feasibility Report</a>
+    <div class="mobile-menu__actions">
+      <button class="btn btn--ghost" id="exportBtnMobile">Export CSV</button>
+      <button class="btn btn--primary" id="runFeasibilityBtnMobile">Run Feasibility</button>
+    </div>
+  </nav>
+</header>
+
+<main class="app-main">
+
+  <!-- ============ SCREEN 1 — PROPOSAL CONFIGURATION ============ -->
+  <section class="screen screen--proposal" id="screen-proposal">
+    <div class="proposal-canvas">
+
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">SPATIAL DECISION SYSTEM</div>
+          <h1 class="page-title">New Feasibility Proposal</h1>
+          <p class="page-subtitle">Configure business parameters, local demographics, and capital constraints to run a multi-factor predictive feasibility analysis.</p>
+        </div>
+        <div class="page-header__actions">
+          <button class="btn btn--outline" id="loadPresetBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Load Preset Scenarios
+          </button>
+          <button class="btn btn--ghost btn--sm" id="resetFormBtn" title="Reset to defaults">Reset</button>
+        </div>
+      </div>
+
+      <div class="bento">
+        <!-- LEFT COLUMN: FORM CONTROLS -->
+        <div class="bento__left">
+
+          <!-- Core Definition Card -->
+          <div class="card card--glow">
+            <div class="card__header">
+              <h2 class="card__heading">
+                <span class="card__icon-badge">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" stroke="#3421E8" stroke-width="1.8"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#3421E8" stroke-width="1.8"/></svg>
+                </span>
+                Core Business Definition
+              </h2>
+              <span class="card__status-tag">Required Parameters</span>
+            </div>
+            
+            <div class="field-grid">
+              <div class="field">
+                <label class="field__label" for="businessIdea">
+                  Business Venture Title
+                  <span class="field__tip" title="Name or concept of your planned commercial venture">ⓘ</span>
+                </label>
+                <input type="text" id="businessIdea" class="field__input" placeholder="e.g. Digital Xerox &amp; Print Hub" value="Digital Xerox &amp; Print Hub" />
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="industryCategory">
+                  Industry &amp; Operating Model
+                  <span class="field__tip" title="Determines unit economics, margins, and equipment benchmarks">ⓘ</span>
+                </label>
+                <div class="select-wrap">
+                  <select id="industryCategory" class="field__input field__select">
+                    <option value="printing" selected>Printing &amp; Reprographics</option>
+                    <option value="food_beverage">Food &amp; Beverage / Cafe</option>
+                    <option value="retail">Retail &amp; Apparel Boutique</option>
+                    <option value="healthcare">Healthcare &amp; Diagnostics Clinic</option>
+                    <option value="education">Education &amp; Skill Coaching</option>
+                    <option value="fitness">Fitness &amp; Wellness Studio</option>
+                    <option value="tech_services">Tech &amp; Coworking Services</option>
+                  </select>
+                  <svg class="select-chevron" width="12" height="7" viewBox="0 0 12 7" fill="none"><path d="M1 1l5 5 5-5" stroke="#464556" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+
+              <div class="field field--full">
+                <label class="field__label" for="targetSegment">
+                  Primary Customer Segment
+                  <span class="field__tip" title="Core audience driving the daily footfall conversion">ⓘ</span>
+                </label>
+                <input type="text" id="targetSegment" class="field__input" placeholder="e.g. College Students, Faculty &amp; Exam Candidates" value="College Students &amp; Faculty" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Spatial Context Card -->
+          <div class="card">
+            <div class="card__header">
+              <h2 class="card__heading">
+                <span class="card__icon-badge">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s8-7.5 8-12a8 8 0 0 0-16 0c0 4.5 8 12 8 12Z" stroke="#3421E8" stroke-width="1.8"/><circle cx="12" cy="9" r="3" stroke="#3421E8" stroke-width="1.8"/></svg>
+                </span>
+                Spatial &amp; Environmental Context
+              </h2>
+              <span class="card__status-tag">Location Parameters</span>
+            </div>
+
+            <div class="field-grid">
+              <div class="field field--full">
+                <label class="field__label" for="targetLocation">
+                  Target Location / Commercial Micro-Market
+                  <span class="field__tip" title="Select or type a recognized business district or city">ⓘ</span>
+                </label>
+                <div class="input-icon-wrap">
+                  <svg class="input-icon" width="16" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s8-7.5 8-12a8 8 0 0 0-16 0c0 4.5 8 12 8 12Z" stroke="#3421E8" stroke-width="1.8"/><circle cx="12" cy="9" r="3" stroke="#3421E8" stroke-width="1.8"/></svg>
+                  <input type="text" id="targetLocation" class="field__input field__input--icon" list="locationSuggestions" placeholder="e.g. Anna Nagar, Chennai" value="Anna Nagar, Chennai, Tamil Nadu" />
+                  <datalist id="locationSuggestions">
+                    <option value="Anna Nagar, Chennai, Tamil Nadu">
+                    <option value="Koramangala, Bangalore, Karnataka">
+                    <option value="Bandra West, Mumbai, Maharashtra">
+                    <option value="Connaught Place, New Delhi">
+                    <option value="Hitec City, Hyderabad, Telangana">
+                    <option value="RS Puram, Coimbatore, Tamil Nadu">
+                    <option value="Hinjewadi, Pune, Maharashtra">
+                    <option value="Salt Lake Sector V, Kolkata, West Bengal">
+                  </datalist>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="macroEnv">Macro Environment</label>
+                <div class="select-wrap">
+                  <select id="macroEnv" class="field__input field__select">
+                    <option value="college_zone" selected>College Zone / Academic Hub</option>
+                    <option value="cbd">Central Business District (CBD)</option>
+                    <option value="residential">High-Density Residential Suburb</option>
+                    <option value="industrial">Industrial &amp; Logistics Corridor</option>
+                    <option value="tech_park">IT &amp; Technology Park Corridor</option>
+                    <option value="transit_hub">Metro &amp; Transit Junction</option>
+                  </select>
+                  <svg class="select-chevron" width="12" height="7" viewBox="0 0 12 7" fill="none"><path d="M1 1l5 5 5-5" stroke="#464556" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="infraRating">Infrastructure Support Grade</label>
+                <div class="select-wrap">
+                  <select id="infraRating" class="field__input field__select">
+                    <option value="urban_high" selected>Urban Grade A (High Power &amp; Footpath)</option>
+                    <option value="semi_urban">Semi-Urban (Moderate Reliability)</option>
+                    <option value="developing">Developing / Emerging (Basic Support)</option>
+                  </select>
+                  <svg class="select-chevron" width="12" height="7" viewBox="0 0 12 7" fill="none"><path d="M1 1l5 5 5-5" stroke="#464556" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial & Output Configuration -->
+          <div class="finance-row">
+            <div class="card card--budget">
+              <div>
+                <div class="budget-header">
+                  <span class="card__eyebrow">Capital Investment Budget (CapEx)</span>
+                  <span class="budget-badge" id="budgetTierBadge">Micro-Scale CapEx</span>
+                </div>
+                <div class="budget-amount" id="budgetAmount">₹3,50,000</div>
+                <input type="range" min="50000" max="5000000" step="10000" value="350000" class="range" id="budgetSlider" aria-label="Capital investment budget" />
+              </div>
+              
+              <div class="budget-presets-wrap">
+                <span class="budget-presets-label">Quick Budget Benchmarks:</span>
+                <div class="budget-presets">
+                  <button type="button" class="chip" data-budget="50000">₹50K (Micro)</button>
+                  <button type="button" class="chip chip--active" data-budget="350000">₹3.5L (Starter)</button>
+                  <button type="button" class="chip" data-budget="1000000">₹10L (Mid-Scale)</button>
+                  <button type="button" class="chip" data-budget="2500000">₹25L (Growth)</button>
+                  <button type="button" class="chip" data-budget="5000000">₹50L (Enterprise)</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card card--output">
+              <div class="field">
+                <label class="field__label" for="reportLang">Executive Language Context</label>
+                <div class="select-wrap">
+                  <select id="reportLang" class="field__input field__select">
+                    <option value="en" selected>English (Global Enterprise Standard)</option>
+                    <option value="ta">Tamil (Regional Tamil Nadu Business Context)</option>
+                    <option value="hi">Hindi (National Commercial Context)</option>
+                  </select>
+                  <svg class="select-chevron" width="12" height="7" viewBox="0 0 12 7" fill="none"><path d="M1 1l5 5 5-5" stroke="#464556" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+              
+              <div class="engine-features-note">
+                <div class="feature-item">✓ Multi-factor spatial saturation check</div>
+                <div class="feature-item">✓ Real CapEx &amp; monthly OpEx modeling</div>
+                <div class="feature-item">✓ Mudra / PMEGP subsidy matching</div>
+              </div>
+
+              <button class="btn btn--primary btn--block btn--lg" id="generateBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Generate Feasibility Analysis →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: INTERACTIVE LEAFLET SPATIAL MAP -->
+        <div class="bento__right">
+          <div class="map-card">
+            <div class="map-card__header">
+              <span class="map-card__title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#EEF0FF" stroke-width="1.6"/><path d="M12 3v18M3 12h18" stroke="#EEF0FF" stroke-width="1.2"/></svg>
+                LIVE SPATIAL CATCHMENT MAP
+              </span>
+              <span class="live-badge" id="mapLiveBadge">
+                <span class="live-dot"></span> OPENSTREETMAP LIVE
+              </span>
+            </div>
+
+            <div class="map-card__body">
+              <!-- Real Leaflet Interactive Map -->
+              <div id="proposalMap" class="leaflet-map-container" aria-label="Interactive Catchment Area Map"></div>
+
+              <div class="map-controls">
+                <button type="button" class="map-btn" id="mapZoomInBtn" title="Zoom In" aria-label="Zoom in">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#131B32" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+                <button type="button" class="map-btn" id="mapZoomOutBtn" title="Zoom Out" aria-label="Zoom out">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="#131B32" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+                <button type="button" class="map-btn" id="mapRecenterBtn" title="Recenter on Location" aria-label="Recenter Map">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#131B32" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#131B32" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+
+              <div class="map-overlay">
+                <div class="map-overlay__row">
+                  <span>Geospatial Catchment Radius</span>
+                  <strong id="catchmentValue">1.0 km</strong>
+                </div>
+                <input type="range" min="0.5" max="5.0" step="0.5" value="1.0" class="range range--sm" id="catchmentSlider" aria-label="Catchment radius" />
+                <div class="map-overlay__subtext">
+                  <span id="mapEstCoverage">Est. Catchment: ~3.14 sq.km</span>
+                  <span id="mapEstDensity">High Walkability</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="map-card__footer">
+              <div class="map-legend-item">
+                <span class="legend-dot legend-dot--target"></span> Proposed Venture Spot
+              </div>
+              <div class="map-legend-item">
+                <span class="legend-dot legend-dot--competitor"></span> Existing Competitors
+              </div>
+              <div class="map-legend-item">
+                <span class="legend-dot legend-dot--radius"></span> Radius Buffer
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2 — AI PROCESSING STATE ============ -->
+  <section class="screen screen--loading" id="screen-loading" hidden>
+    <div class="loading-content">
+      <div class="ai-processor">
+        <div class="ai-processor__ring"></div>
+        <div class="ai-processor__ring ai-processor__ring--outer"></div>
+        <div class="ai-processor__core">
+          <svg width="45" height="45" viewBox="0 0 24 24" fill="none">
+            <rect x="6" y="6" width="12" height="12" rx="2" stroke="#3421E8" stroke-width="1.8"/>
+            <rect x="9.5" y="9.5" width="5" height="5" rx="1" fill="#3421E8"/>
+            <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" stroke="#3421E8" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="ai-processor__dot ai-processor__dot--1"></span>
+        <span class="ai-processor__dot ai-processor__dot--2"></span>
+        <span class="ai-processor__dot ai-processor__dot--3"></span>
+      </div>
+
+      <div class="loading-headers">
+        <h1 class="loading-title">Evaluating Geospatial Feasibility</h1>
+        <p class="loading-subtitle">Computing spatial density gradients, capital adequacy, and local demand elasticity...</p>
+      </div>
+
+      <div class="status-pill">
+        <span class="status-pill__dot"></span>
+        <span id="loadingStatusText">Initializing location intelligence algorithms...</span>
+      </div>
+
+      <div class="progress-track-wrap">
+        <div class="progress-track"><div class="progress-track__fill" id="progressFill"></div></div>
+        <div class="progress-steps-label" id="progressStepPercent">0%</div>
+      </div>
+
+      <div class="loading-pipeline">
+        <div class="pipeline-step pipeline-step--active" id="pipeStep1">1. Spatial Density</div>
+        <div class="pipeline-step" id="pipeStep2">2. Unit Economics</div>
+        <div class="pipeline-step" id="pipeStep3">3. CapEx &amp; Machinery</div>
+        <div class="pipeline-step" id="pipeStep4">4. Subsidies &amp; ROI</div>
+      </div>
+    </div>
+
+    <div class="loading-footer">
+      <span>GeoFeasibility AI Engine • Precision Geospatial Modeling v2.4</span>
+      <span class="loading-footer__ai">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7l-9-5Z" stroke="#464556" stroke-width="1.8"/></svg>
+        Multi-Factor Algorithmic Assessment
+      </span>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3 — ANALYSIS FEASIBILITY REPORT ============ -->
+  <section class="screen screen--report" id="screen-report" hidden>
+    <div class="report-canvas">
+
+      <!-- Executive Header Bar (Print & Return) -->
+      <div class="report-top-nav">
+        <button class="btn btn--outline btn--sm" id="backToProposalBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Modify Configuration
+        </button>
+        <div class="report-top-actions">
+          <button class="btn btn--outline btn--sm" id="exportReportCsvBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Export CSV
+          </button>
+          <button class="btn btn--primary btn--sm" id="downloadReportBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Print / Save PDF Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Section 1: Executive Summary & Verdict -->
+      <div class="report-summary">
+        <div class="report-summary__text">
+          <span class="badge-pill" id="reportIndustryBadge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 8 12 2l10 6-10 6L2 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6 11v6c0 1.7 2.7 3 6 3s6-1.3 6-3v-6" stroke="currentColor" stroke-width="1.8"/></svg>
+            <span id="reportIndustryBadgeText">PRINTING &amp; REPROGRAPHICS</span>
+          </span>
+          <h1 class="report-title" id="reportBusinessTitle">Anna Nagar Academic Print Hub</h1>
+          <p class="report-location">
+            <svg width="16" height="20" viewBox="0 0 24 30" fill="none"><path d="M12 29s10-11.6 10-18A10 10 0 0 0 2 11c0 6.4 10 18 10 18Z" stroke="#3421E8" stroke-width="1.8"/><circle cx="12" cy="11" r="3.5" stroke="#3421E8" stroke-width="1.8"/></svg>
+            <span id="reportLocationText">Anna Nagar, Chennai Target Zone</span>
+            <span class="report-catchment-tag" id="reportCatchmentTag">1.0 km Catchment Buffer</span>
+          </p>
+        </div>
+
+        <div class="verdict-card" id="verdictCard">
+          <div class="verdict-ring">
+            <svg viewBox="0 0 88 88" width="88" height="88">
+              <circle cx="44" cy="44" r="38" fill="none" stroke="#E3E7FF" stroke-width="7"/>
+              <circle id="verdictRingProgress" cx="44" cy="44" r="38" fill="none" stroke="#3421E8" stroke-width="7" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="238.76" transform="rotate(-90 44 44)"/>
+            </svg>
+            <span class="verdict-ring__score" id="verdictScore">88</span>
+          </div>
+          <div class="verdict-card__info">
+            <span class="verdict-eyebrow" id="verdictEyebrow">AI FEASIBILITY SCORE</span>
+            <div class="verdict-label" id="verdictLabel">Highly Viable</div>
+            <p class="verdict-subtext" id="verdictSubtext">Favorable density, strong target-segment affinity &amp; sound unit economics.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Financial KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-card__top">
+            <span>RECOMMENDED CAPEX</span>
+            <svg width="20" height="16" viewBox="0 0 24 16" fill="none"><rect x="1" y="3" width="22" height="10" rx="2" stroke="#464556" stroke-width="1.6"/><circle cx="12" cy="8" r="3" stroke="#464556" stroke-width="1.6"/></svg>
+          </div>
+          <div class="kpi-card__value" id="kpiCapex">₹2,85,000</div>
+          <div class="kpi-card__trend" id="kpiCapexTrend">
+            <span id="kpiCapexTrendIcon">✓</span>
+            <span id="kpiCapexTrendText">Optimal budget alignment</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card__top">
+            <span>EST. MONTHLY NET PROFIT</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 6.5c0-2-2.2-3.5-5-3.5s-5 1.6-5 3.7c0 4.5 10 2.3 10 6.8 0 2.2-2.2 3.5-5 3.5s-5-1.5-5-3.5" stroke="#464556" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <div class="kpi-card__value" id="kpiMonthlyProfit">₹22,000</div>
+          <div class="kpi-card__trend kpi-card__trend--up" id="kpiProfitTrend">
+            <span id="kpiProfitMarginText">24.5% Profit Margin</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card__top">
+            <span>EST. BREAK-EVEN HORIZON</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#464556" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="#464556" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <div class="kpi-card__value" id="kpiBreakeven">13 Months</div>
+          <div class="kpi-card__note" id="kpiBreakevenNote">Standard operational runway</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card__top">
+            <span>PROJECTED ANNUAL ROI</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M23 6l-9.5 9.5-5-5L1 18M17 6h6v6" stroke="#464556" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="kpi-card__value" id="kpiRoi">92.6%</div>
+          <div class="kpi-card__trend kpi-card__trend--up" id="kpiRoiTrend">
+            <span id="kpiRoiTierText">Top-tier capital efficiency</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Financial Capital & Operating Breakdown Widget -->
+      <div class="card card--financials">
+        <div class="section-heading section-heading--simple">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="#3421E8" stroke-width="2" stroke-linecap="round"/></svg>
+            Capital Allocation &amp; Unit Economics Breakdown
+          </h2>
+          <span class="badge-pill badge-pill--neutral" id="grossRevenueTag">Est. Gross Revenue: ₹85,000 / mo</span>
+        </div>
+
+        <div class="financials-breakdown-grid">
+          <!-- CapEx Allocation Column -->
+          <div class="breakdown-col">
+            <h4 class="breakdown-col__title">Initial CapEx Distribution (₹<span id="capexDistTotal">2,85,000</span>)</h4>
+            <div class="stacked-bar" id="capexStackedBar">
+              <div class="stacked-bar__seg stacked-bar__seg--1" style="width: 55%" title="Machinery / Core Equipment: 55%"></div>
+              <div class="stacked-bar__seg stacked-bar__seg--2" style="width: 20%" title="Interior & Fit-out: 20%"></div>
+              <div class="stacked-bar__seg stacked-bar__seg--3" style="width: 15%" title="Rental Advance / Deposit: 15%"></div>
+              <div class="stacked-bar__seg stacked-bar__seg--4" style="width: 10%" title="Working Capital Reserve: 10%"></div>
+            </div>
+            <div class="breakdown-legend" id="capexLegend">
+              <div class="legend-row"><span><span class="legend-box legend-box--1"></span> Machinery &amp; Equipment:</span><strong id="barEqCost">₹1,56,750</strong></div>
+              <div class="legend-row"><span><span class="legend-box legend-box--2"></span> Interior &amp; Civil Setup:</span><strong id="barFitoutCost">₹57,000</strong></div>
+              <div class="legend-row"><span><span class="legend-box legend-box--3"></span> Rental Security Deposit:</span><strong id="barDepositCost">₹42,750</strong></div>
+              <div class="legend-row"><span><span class="legend-box legend-box--4"></span> Working Capital Runway:</span><strong id="barRunwayCost">₹28,500</strong></div>
+            </div>
+          </div>
+
+          <!-- Monthly OpEx Breakdown Column -->
+          <div class="breakdown-col">
+            <h4 class="breakdown-col__title">Monthly OpEx Breakdown (₹<span id="opexDistTotal">63,000</span> / mo)</h4>
+            <div class="stacked-bar" id="opexStackedBar">
+              <div class="stacked-bar__seg stacked-bar__seg--5" style="width: 32%" title="Commercial Rent: 32%"></div>
+              <div class="stacked-bar__seg stacked-bar__seg--6" style="width: 30%" title="Salaries & Staff: 30%"></div>
+              <div class="stacked-bar__seg stacked-bar__seg--7" style="width: 23%" title="COGS / Consumables: 23%"></div>
+              <div class="stacked-bar__seg stacked-bar__seg--8" style="width: 15%" title="Power, Utilities & Misc: 15%"></div>
+            </div>
+            <div class="breakdown-legend" id="opexLegend">
+              <div class="legend-row"><span><span class="legend-box legend-box--5"></span> Space Commercial Rent:</span><strong id="barRentCost">₹20,000</strong></div>
+              <div class="legend-row"><span><span class="legend-box legend-box--6"></span> Staff Wages &amp; Labor:</span><strong id="barSalaryCost">₹19,000</strong></div>
+              <div class="legend-row"><span><span class="legend-box legend-box--7"></span> Materials / COGS:</span><strong id="barCogsCost">₹14,500</strong></div>
+              <div class="legend-row"><span><span class="legend-box legend-box--8"></span> Electricity, WiFi &amp; Misc:</span><strong id="barUtilCost">₹9,500</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Location & Context Advantage Banner -->
+      <div class="note-banner" id="locationAdvantageBanner">
+        <span class="note-banner__icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" stroke="#E5E2FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <div>
+          <h3 class="note-banner__title" id="locationAdvantageTitle">Academic Proximity Advantage</h3>
+          <p class="note-banner__text" id="locationAdvantageText">Located within prime proximity of major educational institutions. Historical data indicates a surge in document processing during exam cycles (Nov-Dec, April-May).</p>
+        </div>
+      </div>
+
+      <!-- Section 5: Spatial Market Analysis & Multi-Radius Selector -->
+      <div class="report-section">
+        <div class="section-heading">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#131B32" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="#131B32" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Geospatial Market &amp; Saturation Analysis
+          </h2>
+          <div class="radius-toggle-wrap">
+            <span class="radius-label">Analysis Buffer:</span>
+            <div class="segmented" role="tablist" aria-label="Catchment radius filter">
+              <button class="segmented__btn" data-radius="0.5">500m</button>
+              <button class="segmented__btn segmented__btn--active" data-radius="1">1.0 km</button>
+              <button class="segmented__btn" data-radius="2">2.0 km</button>
+              <button class="segmented__btn" data-radius="5">5.0 km</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-card">
+            <span class="stat-card__label">AREA CLASSIFICATION</span>
+            <div class="stat-card__value" id="marketAreaClass">High-Density Mixed Commercial</div>
+            <span class="stat-card__hint" id="marketAreaHint">Optimal foot-traffic conversion zone</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label">EST. DAILY PEDESTRIAN FOOTFALL</span>
+            <div class="stat-card__value" id="marketFootfall">6,500 – 8,500</div>
+            <span class="stat-card__hint" id="marketFootfallHint">Peak hours: 8:30 AM – 7:00 PM</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__label">COMPETITOR DENSITY</span>
+            <div class="stat-card__value" id="marketCompetitors">3 Active Hubs</div>
+            <span class="stat-card__hint" id="marketCompetitorHint">Saturation Level: Moderate (Healthy Gap)</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Strategic Gap Radar Banner -->
+        <div class="gap-banner">
+          <div class="gap-banner__map-wrap">
+            <div id="reportGapMap" class="gap-banner__map" aria-label="Interactive Gap Radar Map"></div>
+            <span class="gap-banner__radar-badge">
+              <span class="live-dot live-dot--radar"></span>
+              RADAR ACTIVE
+            </span>
+          </div>
+          <div class="gap-banner__text">
+            <span class="gap-banner__tag">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="#E2DFFF" stroke-width="1.6"/><circle cx="12" cy="12" r="9" stroke="#E2DFFF" stroke-width="1.6"/></svg>
+              RECOMMENDED PRIME NODE
+            </span>
+            <h3 id="gapBannerTitle">Strategic Market Gap Identified</h3>
+            <p id="gapBannerText">Our spatial model detects an underserved corridor in the northeastern zone of the catchment buffer. Competitors are heavily clustered in the southern street, leaving strong unmet daily demand near transit and campus gates.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 6: Tailored Machinery & Equipment Procurement -->
+      <div class="report-section">
+        <div class="section-heading section-heading--simple">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" stroke="#131B32" stroke-width="1.8"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#131B32" stroke-width="1.8"/></svg>
+            Equipment Procurement &amp; Sourcing Specifications
+          </h2>
+          <span class="badge-pill badge-pill--neutral">Catalog Matched to CapEx</span>
+        </div>
+
+        <div class="equip-grid" id="equipmentGrid">
+          <!-- Dynamically Rendered by script.js -->
+        </div>
+      </div>
+
+      <!-- Section 7: Government Schemes, Subsidies & Financing -->
+      <div class="report-section">
+        <div class="section-heading section-heading--simple">
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 10 12 4l9 6M4 10v9h16v-9M2 21h20" stroke="#131B32" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            Eligible Government Financing &amp; MSME Subsidies
+          </h2>
+          <span class="badge-pill badge-pill--neutral">Matched to Capital Tier</span>
+        </div>
+
+        <div id="schemesContainer">
+          <!-- Dynamically Rendered by script.js -->
+        </div>
+      </div>
+
+      <!-- Bottom Actions -->
+      <div class="report-actions">
+        <button class="btn btn--outline" id="bottomBackBtn">← Reconfigure Parameters</button>
+        <div class="report-actions__right">
+          <button class="btn btn--ghost" id="bottomExportJsonBtn">Export Raw JSON</button>
+          <button class="btn btn--primary" id="bottomPrintBtn">Print / Download Executive PDF</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ PRESETS MODAL ============ -->
+<div class="modal-overlay" id="presetModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title">Select an Enterprise Preset</h3>
+        <p class="modal-subtitle">Load pre-calibrated commercial scenarios to test the feasibility engine across different sectors.</p>
+      </div>
+      <button class="modal-close-btn" id="closePresetModalBtn" aria-label="Close modal">×</button>
+    </div>
+    <div class="presets-grid" id="presetsList">
+      <!-- Dynamically generated preset cards -->
+    </div>
+  </div>
+</div>
+
+<!-- ============ GLOBAL FOOTER ============ -->
+<footer class="global-footer">
+  <span>© 2026 GeoFeasibility AI. Enterprise Geospatial Feasibility Engine. All rights reserved.</span>
+  <nav class="global-footer__links">
+    <a href="#" id="footerMethodologyLink">Algorithmic Methodology</a>
+    <a href="#" id="footerPresetsLink">Presets</a>
+    <a href="#">Privacy &amp; Security</a>
+    <a href="#">API Documentation</a>
+  </nav>
+</footer>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/script.js"></script>
+</body>
+</html>
+

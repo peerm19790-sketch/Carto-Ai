@@ -20,7 +20,7 @@
   // Industry Unit Economics & Benchmarks
   const INDUSTRY_CONFIG = {
     printing: {
-      name: "Printing & Reprographics",
+      name: "Printing & Photocopying",
       minCapex: 180000,
       optimalCapex: 350000,
       avgGrossMargin: 0.64,
@@ -36,7 +36,7 @@
         { name: "Xerox WorkCentre 7855", role: "Color / Scan Node", spec: "1200 x 2400 dpi Production", cost: 95000, note: "High Margin Color Production", recommended: true },
         { name: "Electric Heavy-Duty Spiral Binder", role: "Finishing & Binding", spec: "500 sheets capacity", cost: 18000, note: "Essential Academic Finishing", recommended: false }
       ],
-      contextNote: "High density of colleges and institutions within catchment creates reliable recurring demand. 40%+ document volume surges occur during exam and project submission seasons."
+      contextNote: "Nearby colleges and institutions create regular demand for printing and photocopying, especially during exams and project submission periods."
     },
     food_beverage: {
       name: "Food & Beverage / Cafe",
@@ -523,6 +523,14 @@
     document.getElementById("mapRecenterBtn")?.addEventListener("click", () => {
       syncMapWithLocationInput();
     });
+
+    // Invalidate map size after initial rendering
+    setTimeout(() => {
+      if (proposalMap) proposalMap.invalidateSize();
+    }, 100);
+    setTimeout(() => {
+      if (proposalMap) proposalMap.invalidateSize();
+    }, 400);
   }
 
   function updateMapLocation(lat, lng, radiusKm) {
@@ -619,6 +627,10 @@
       iconAnchor: [9, 9]
     });
     L.marker([lat, lng], { icon: targetIcon }).addTo(reportGapMap);
+
+    setTimeout(() => {
+      if (reportGapMap) reportGapMap.invalidateSize();
+    }, 150);
   }
 
   /* ==========================================================================
@@ -909,7 +921,7 @@
 
     // Note / Context Banner
     const locationAdvantageTitle = document.getElementById("locationAdvantageTitle");
-    if (locationAdvantageTitle) locationAdvantageTitle.textContent = `${industry.name} — Spatial Advantage`;
+    if (locationAdvantageTitle) locationAdvantageTitle.textContent = `${industry.name} — Location Advantage`;
 
     const locationAdvantageText = document.getElementById("locationAdvantageText");
     if (locationAdvantageText) locationAdvantageText.textContent = contextNote;
@@ -1383,6 +1395,10 @@
       if (proposalMap && !screens.proposal.hidden) proposalMap.invalidateSize();
       if (reportGapMap && !screens.report.hidden) reportGapMap.invalidateSize();
     }, 200);
+  });
+
+  window.addEventListener("load", () => {
+    if (proposalMap) proposalMap.invalidateSize();
   });
 
   // Topbar Logo click

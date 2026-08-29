@@ -603,29 +603,12 @@
       dashArray: "6, 6"
     }).addTo(proposalMap);
 
+    // Competitor pins intentionally not rendered on the front-page map
+    // (kept out of the Feasibility Radar view — see report screen for
+    // competitor-density figures instead). Any previously drawn pins are
+    // still cleaned up here in case this function runs after an update.
     proposalCompMarkers.forEach((m) => proposalMap.removeLayer(m));
     proposalCompMarkers = [];
-
-    const compOffsets = [
-      [0.004, -0.005],
-      [-0.005, 0.003],
-      [0.006, 0.004],
-      [-0.003, -0.006]
-    ];
-
-    compOffsets.forEach(([dLat, dLng], idx) => {
-      const cIcon = L.divIcon({
-        className: "custom-pin-competitor",
-        html: COMPETITOR_PIN_HTML,
-        iconSize: [20, 26],
-        iconAnchor: [10, 24],
-        popupAnchor: [0, -22]
-      });
-      const cMarker = L.marker([lat + dLat, lng + dLng], { icon: cIcon })
-        .addTo(proposalMap)
-        .bindPopup(`Existing Competitor #${idx + 1}`);
-      proposalCompMarkers.push(cMarker);
-    });
 
     // Keep the Google-style search pill label in sync with the active location
     const pillText = document.getElementById("mapSearchPillText");
@@ -768,8 +751,10 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function formatINR(val) {
-    return "₹" + Number(val).toLocaleString("en-IN");
+  function formatINR(val, roundTo = 1000) {
+    const num = Number(val) || 0;
+    const rounded = Math.round(num / roundTo) * roundTo;
+    return "₹" + rounded.toLocaleString("en-IN");
   }
 
   function getFormData() {
@@ -943,7 +928,7 @@
 
     // Financial Breakdown Widget
     const capexDistTotal = document.getElementById("capexDistTotal");
-    if (capexDistTotal) capexDistTotal.textContent = Number(metrics.recommendedCapex).toLocaleString("en-IN");
+    if (capexDistTotal) capexDistTotal.textContent = (Math.round(Number(metrics.recommendedCapex) / 1000) * 1000).toLocaleString("en-IN");
 
     const barEqCost = document.getElementById("barEqCost");
     if (barEqCost) barEqCost.textContent = formatINR(metrics.capexEq);
@@ -958,7 +943,7 @@
     if (barRunwayCost) barRunwayCost.textContent = formatINR(metrics.capexRunway);
 
     const opexDistTotal = document.getElementById("opexDistTotal");
-    if (opexDistTotal) opexDistTotal.textContent = Number(metrics.totalMonthlyOpex).toLocaleString("en-IN");
+    if (opexDistTotal) opexDistTotal.textContent = (Math.round(Number(metrics.totalMonthlyOpex) / 1000) * 1000).toLocaleString("en-IN");
 
     const barRentCost = document.getElementById("barRentCost");
     if (barRentCost) barRentCost.textContent = formatINR(metrics.estRent);

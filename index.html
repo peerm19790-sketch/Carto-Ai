@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-  <title>Carto+ AI — Enterprise Location Intelligence & Business Feasibility Engine</title>
+  <title>Carto AI — Enterprise Location Intelligence & Business Feasibility Engine</title>
   <meta name="description" content="AI-powered geospatial business feasibility engine. Configure location, capital, and operational parameters to generate predictive spatial analytics, ROI models, and equipment recommendations." />
+  <meta name="theme-color" content="#3421e8" />
+
+  <!-- Favicons / App Icons (Carto AI logo) -->
+  <link rel="icon" type="image/png" href="images/cart0-logo.png" />
+  <link rel="apple-touch-icon" href="images/cart0-logo.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,6 +19,18 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+<!-- ============ SITE PRELOADER (shown until the app is fully ready) ============ -->
+<div class="preloader" id="pagePreloader" aria-live="polite" aria-label="Loading Carto AI">
+  <div class="preloader__glow"></div>
+  <div class="preloader__logo-wrap">
+    <div class="preloader__ring"></div>
+    <img src="images/cart0-logo.png" alt="Carto AI" class="preloader__logo" width="72" height="72" />
+  </div>
+  <div class="preloader__brand">Carto <span>AI</span></div>
+  <div class="preloader__bar"><span id="preloaderBarFill"></span></div>
+  <div class="preloader__text" id="preloaderText">Loading enterprise geospatial engine…</div>
+</div>
 
 <!-- ============ GLOBAL SECURE ENV STRIP ============ -->
 <div class="secure-strip">
@@ -25,13 +43,9 @@
   <div class="topbar__inner">
     <div class="brand" id="brandLogo" role="button" tabindex="0" title="GeoFeasibility AI Home">
       <span class="brand__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="9.25" stroke="#4F46FF" stroke-width="1.8"/>
-          <path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="#4F46FF" stroke-width="1.8" stroke-linecap="round"/>
-          <circle cx="12" cy="12" r="3" fill="#4F46FF"/>
-        </svg>
+        <img src="images/cart0-logo.png" alt="Carto AI logo" width="26" height="26" loading="eager" />
       </span>
-      <span class="brand__name">Carto+ <span class="brand__ai">AI</span></span>
+      <span class="brand__name">Carto <span class="brand__ai">AI</span></span>
     </div>
 
     <nav class="mainnav" id="mainNav" aria-label="Main Navigation">
@@ -82,11 +96,7 @@
     <div class="mobile-menu__header">
       <div class="brand">
         <span class="brand__icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="9.25" stroke="#4F46FF" stroke-width="1.8"/>
-            <path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="#4F46FF" stroke-width="1.8" stroke-linecap="round"/>
-            <circle cx="12" cy="12" r="3" fill="#4F46FF"/>
-          </svg>
+          <img src="images/cart0-logo.png" alt="Carto AI logo" width="26" height="26" loading="eager" />
         </span>
         <span class="brand__name">Carto <span class="brand__ai">AI</span></span>
       </div>
@@ -313,15 +323,21 @@
                 LIVE  MAP
               </span>
               <span class="live-badge" id="mapLiveBadge">
-                <span class="live-dot"></span> OPENSTREETMAP LIVE
+                <span class="live-dot"></span> LIVE INTERACTIVE MAP
               </span>
             </div>
 
-            <div class="map-card__body">
-              <!-- Real Leaflet Interactive Map -->
+            <div class="map-card__body" id="mapCardBody">
+              <!-- Real Leaflet Interactive Map (spatial analytics: radius, competitors) -->
               <div id="proposalMap" class="leaflet-map-container" aria-label="Interactive Catchment Area Map"></div>
 
-              <div class="map-controls">
+              <!-- Google Maps-style search pill (cosmetic, mirrors the location field above) -->
+              <div class="map-search-pill" id="mapSearchPill">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#5f6368" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="#5f6368" stroke-width="2" stroke-linecap="round"/></svg>
+                <span id="mapSearchPillText">Anna Nagar, Chennai, Tamil Nadu</span>
+              </div>
+
+              <div class="map-controls" id="mapControls">
                 <button type="button" class="map-btn" id="mapZoomInBtn" title="Zoom In" aria-label="Zoom in">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#131B32" stroke-width="2" stroke-linecap="round"/></svg>
                 </button>
@@ -333,7 +349,13 @@
                 </button>
               </div>
 
-              <div class="map-overlay">
+              <!-- Google Maps-style layer thumbnail switcher (bottom-left corner) -->
+              <button type="button" class="map-layer-thumb" id="mapLayerToggleBtn" title="Toggle satellite view" aria-label="Toggle satellite view">
+                <span class="map-layer-thumb__preview map-layer-thumb__preview--sat"></span>
+                <span class="map-layer-thumb__label" id="mapLayerToggleLabel">Satellite</span>
+              </button>
+
+              <div class="map-overlay" id="mapOverlayPanel">
                 <div class="map-overlay__row">
                   <span>Geospatial Catchment Radius</span>
                   <strong id="catchmentValue">1.0 km</strong>
@@ -371,11 +393,7 @@
         <div class="ai-processor__ring"></div>
         <div class="ai-processor__ring ai-processor__ring--outer"></div>
         <div class="ai-processor__core">
-          <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
-            <rect x="6" y="6" width="12" height="12" rx="2" stroke="#3421E8" stroke-width="1.8"/>
-            <rect x="9.5" y="9.5" width="5" height="5" rx="1" fill="#3421E8"/>
-            <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" stroke="#3421E8" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
+          <img src="images/cart0-logo.png" alt="Carto AI" width="42" height="42" />
         </div>
         <span class="ai-processor__dot ai-processor__dot--1"></span>
         <span class="ai-processor__dot ai-processor__dot--2"></span>
@@ -717,5 +735,64 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="js/script.js"></script>
+
+<!-- Site Preloader Controller -->
+<script>
+  (function () {
+    var MIN_VISIBLE_MS = 900; // keep splash visible briefly even on fast connections
+    var startTime = Date.now();
+    var preloader = document.getElementById("pagePreloader");
+    var barFill = document.getElementById("preloaderBarFill");
+    var statusText = document.getElementById("preloaderText");
+    if (!preloader) return;
+
+    document.body.classList.add("preloading");
+
+    var messages = [
+      "Loading enterprise geospatial engine…",
+      "Fetching cartography assets…",
+      "Warming up feasibility models…",
+      "Almost ready…"
+    ];
+    var msgIndex = 0;
+    var msgTimer = setInterval(function () {
+      msgIndex = (msgIndex + 1) % messages.length;
+      if (statusText) statusText.textContent = messages[msgIndex];
+    }, 700);
+
+    // Animate a lightweight progress bar up to ~90% while real assets load
+    var progress = 0;
+    var progressTimer = setInterval(function () {
+      progress = Math.min(progress + Math.random() * 18, 90);
+      if (barFill) barFill.style.width = progress + "%";
+    }, 220);
+
+    function hidePreloader() {
+      clearInterval(msgTimer);
+      clearInterval(progressTimer);
+      if (barFill) barFill.style.width = "100%";
+
+      var elapsed = Date.now() - startTime;
+      var remaining = Math.max(MIN_VISIBLE_MS - elapsed, 0);
+
+      setTimeout(function () {
+        preloader.classList.add("preloader--done");
+        document.body.classList.remove("preloading");
+        setTimeout(function () {
+          preloader.setAttribute("hidden", "");
+        }, 500); // matches CSS fade-out duration
+      }, remaining);
+    }
+
+    if (document.readyState === "complete") {
+      hidePreloader();
+    } else {
+      window.addEventListener("load", hidePreloader);
+      // Safety net: never block the app for more than 6s even if a
+      // third-party asset (fonts/tiles) stalls.
+      setTimeout(hidePreloader, 6000);
+    }
+  })();
+</script>
 </body>
 </html>

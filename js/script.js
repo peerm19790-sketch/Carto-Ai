@@ -485,9 +485,20 @@
   let proposalCircle = null;
   let proposalTargetMarker = null;
   let proposalCompMarkers = [];
+  let currentMapCenter = null; // { lat, lng } — kept in sync for the Google Maps view
 
   let reportGapMap = null;
   let reportCircle = null;
+
+  // Google Maps-style teardrop pin markup (reliable rotated-square technique)
+  const TARGET_PIN_HTML = '<div class="custom-pin-target-inner"></div>';
+  const COMPETITOR_PIN_HTML = '<div class="custom-pin-competitor-inner"></div>';
+
+  const ROAD_TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+  const SATELLITE_TILE_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+  let proposalRoadLayer = null;
+  let proposalSatLayer = null;
+  let satelliteActive = false;
 
   function initProposalMap() {
     const mapContainer = document.getElementById("proposalMap");
@@ -507,10 +518,14 @@
       scrollWheelZoom: false
     });
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    proposalRoadLayer = L.tileLayer(ROAD_TILE_URL, {
       maxZoom: 19,
       subdomains: "abcd"
     }).addTo(proposalMap);
+
+    proposalSatLayer = L.tileLayer(SATELLITE_TILE_URL, {
+      maxZoom: 19
+    });
 
     updateMapLocation(defaultLoc.lat, defaultLoc.lng, 1.0);
 
@@ -523,6 +538,9 @@
     document.getElementById("mapRecenterBtn")?.addEventListener("click", () => {
       syncMapWithLocationInput();
     });
+    document.getElementById("mapLayerToggleBtn")?.addEventListener("click", () => {
+      toggleSatelliteLayer();
+    });
 
     // Invalidate map size after initial rendering
     setTimeout(() => {
@@ -533,7 +551,32 @@
     }, 400);
   }
 
+  function toggleSatelliteLayer() {
+    if (!proposalMap || !proposalRoadLayer || !proposalSatLayer) return;
+    satelliteActive = !satelliteActive;
+    if (satelliteActive) {
+      proposalMap.removeLayer(proposalRoadLayer);
+      proposalSatLayer.addTo(proposalMap);
+    } else {
+      proposalMap.removeLayer(proposalSatLayer);
+      proposalRoadLayer.addTo(proposalMap);
+    }
+
+    // Update the Google Maps-style corner thumbnail: it previews the OTHER layer
+    const thumb = document.getElementById("mapLayerToggleBtn");
+    const preview = thumb?.querySelector(".map-layer-thumb__preview");
+    const label = document.getElementById("mapLayerToggleLabel");
+    if (thumb) thumb.classList.toggle("map-layer-thumb--active", satelliteActive);
+    if (preview) {
+      preview.classList.toggle("map-layer-thumb__preview--sat", !satelliteActive);
+      preview.classList.toggle("map-layer-thumb__preview--road", satelliteActive);
+    }
+    if (label) label.textContent = satelliteActive ? "Map" : "Satellite";
+  }
+
   function updateMapLocation(lat, lng, radiusKm) {
+    currentMapCenter = { lat, lng };
+
     if (!proposalMap || typeof L === "undefined") return;
 
     proposalMap.setView([lat, lng], radiusKm <= 1 ? 14 : radiusKm <= 2.5 ? 13 : 12);
@@ -541,8 +584,10 @@
     if (proposalTargetMarker) proposalMap.removeLayer(proposalTargetMarker);
     const targetIcon = L.divIcon({
       className: "custom-pin-target",
-      iconSize: [20, 20],
-      iconAnchor: [10, 10]
+      html: TARGET_PIN_HTML,
+      iconSize: [26, 34],
+      iconAnchor: [13, 32],
+      popupAnchor: [0, -30]
     });
     proposalTargetMarker = L.marker([lat, lng], { icon: targetIcon })
       .addTo(proposalMap)
@@ -571,14 +616,23 @@
     compOffsets.forEach(([dLat, dLng], idx) => {
       const cIcon = L.divIcon({
         className: "custom-pin-competitor",
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
+        html: COMPETITOR_PIN_HTML,
+        iconSize: [20, 26],
+        iconAnchor: [10, 24],
+        popupAnchor: [0, -22]
       });
       const cMarker = L.marker([lat + dLat, lng + dLng], { icon: cIcon })
         .addTo(proposalMap)
         .bindPopup(`Existing Competitor #${idx + 1}`);
       proposalCompMarkers.push(cMarker);
     });
+
+    // Keep the Google-style search pill label in sync with the active location
+    const pillText = document.getElementById("mapSearchPillText");
+    const locationInput = document.getElementById("targetLocation");
+    if (pillText && locationInput && locationInput.value) {
+      pillText.textContent = locationInput.value;
+    }
   }
 
   function initReportGapMap(lat, lng, radiusKm) {
@@ -623,8 +677,10 @@
 
     const targetIcon = L.divIcon({
       className: "custom-pin-target",
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
+      html: TARGET_PIN_HTML,
+      iconSize: [22, 28],
+      iconAnchor: [11, 26],
+      popupAnchor: [0, -24]
     });
     L.marker([lat, lng], { icon: targetIcon }).addTo(reportGapMap);
 
